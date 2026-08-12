@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useSyncExternalStore } from "react";
+import { flushSync } from "react-dom";
 import { Moon, Sun } from "lucide-react";
 
 type Theme = "light" | "dark";
@@ -38,6 +39,18 @@ function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+function getToggleCenter(button: HTMLButtonElement) {
+  const rect = button.getBoundingClientRect();
+  // Layout-viewport coords — must match the root VT snapshot box
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+  const endRadius = Math.hypot(
+    Math.max(x, window.innerWidth - x),
+    Math.max(y, window.innerHeight - y)
+  );
+  return { x, y, endRadius };
+}
+
 function useIsClient() {
   return useSyncExternalStore(
     () => () => {},
@@ -54,52 +67,49 @@ export function ThemeToggle() {
   );
   const isClient = useIsClient();
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const animatingRef = useRef(false);
 
   const toggleTheme = async () => {
+    if (animatingRef.current) return;
+
     const next: Theme = theme === "dark" ? "light" : "dark";
     const button = buttonRef.current;
-
-    const switchTheme = () => {
-      applyTheme(next);
-    };
 
     if (
       !button ||
       !("startViewTransition" in document) ||
       prefersReducedMotion()
     ) {
-      switchTheme();
+      applyTheme(next);
       return;
     }
 
-    const { top, left, width, height } = button.getBoundingClientRect();
-    const x = left + width / 2;
-    const y = top + height / 2;
-    const endRadius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y)
-    );
+    const { x, y, endRadius } = getToggleCenter(button);
+    const root = document.documentElement;
 
-    const transition = document.startViewTransition(switchTheme);
+    root.style.setProperty("--theme-toggle-x", `${x}px`);
+    root.style.setProperty("--theme-toggle-y", `${y}px`);
+    root.style.setProperty("--theme-toggle-r", `${endRadius}px`);
+    root.dataset.themeTransition = "true";
+    animatingRef.current = true;
 
     try {
-      await transition.ready;
+      const transition = document.startViewTransition(() => {
+        // Flush React so the "new" snapshot is the real next theme — avoids the hitch
+        flushSync(() => {
+          applyTheme(next);
+        });
+      });
 
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`,
-          ],
-        },
-        {
-          duration: 560,
-          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
-          pseudoElement: "::view-transition-new(root)",
-        }
-      );
+      await transition.finished;
     } catch {
-      // Transition aborted or unsupported mid-flight
+      applyTheme(next);
+    } finally {
+      delete root.dataset.themeTransition;
+      root.style.removeProperty("--theme-toggle-x");
+      root.style.removeProperty("--theme-toggle-y");
+      root.style.removeProperty("--theme-toggle-r");
+      animatingRef.current = false;
     }
   };
 
