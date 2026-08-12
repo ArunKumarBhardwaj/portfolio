@@ -75,8 +75,8 @@ body {
 }
 
 /* Telegram-style circular theme wipe
-   Disable default VT fade/scale; WAAPI clip-path is applied in JS.
-   Do not use !important on animation — it can block WAAPI in Chrome. */
+   Default VT fade/scale off. Circle keyframes are injected per toggle in JS
+   with literal coordinates (avoids CSS-var + ready-race bugs). */
 ::view-transition-group(root) {
   animation: none;
 }

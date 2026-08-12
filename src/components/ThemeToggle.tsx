@@ -51,6 +51,35 @@ function getToggleCenter(button: HTMLButtonElement) {
   return { x, y, endRadius };
 }
 
+/**
+ * Inject keyframes with literal px coords BEFORE startViewTransition.
+ * Waiting for transition.ready + WAAPI leaves frames where the new root is
+ * unclipped (looks like top-left flash + pause), and CSS vars on <html> do not
+ * reliably inherit into ::view-transition-* in Chrome / DDG.
+ */
+function installCircleTransitionStyle(x: number, y: number, endRadius: number) {
+  const style = document.createElement("style");
+  const name = `theme-circle-${Math.round(x)}-${Math.round(y)}-${Date.now()}`;
+  style.dataset.themeTransition = "true";
+  style.textContent = `
+    @keyframes ${name} {
+      from {
+        clip-path: circle(0px at ${x}px ${y}px);
+      }
+      to {
+        clip-path: circle(${endRadius}px at ${x}px ${y}px);
+      }
+    }
+    ::view-transition-new(root) {
+      animation: ${name} ${TRANSITION_MS}ms cubic-bezier(0.4, 0, 0.2, 1) both !important;
+    }
+  `;
+  document.head.appendChild(style);
+  return () => {
+    style.remove();
+  };
+}
+
 function useIsClient() {
   return useSyncExternalStore(
     () => () => {},
@@ -84,10 +113,9 @@ export function ThemeToggle() {
       return;
     }
 
-    // Capture before VT — literal px values (CSS vars don't inherit into VT
-    // pseudo-elements reliably in Chrome / some WebViews → falls back to 0,0)
     const { x, y, endRadius } = getToggleCenter(button);
     animatingRef.current = true;
+    const removeStyle = installCircleTransitionStyle(x, y, endRadius);
 
     try {
       const transition = document.startViewTransition(() => {
@@ -96,28 +124,11 @@ export function ThemeToggle() {
         });
       });
 
-      await transition.ready;
-
-      const animation = document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`,
-          ],
-        },
-        {
-          duration: TRANSITION_MS,
-          // Smooth ease — avoids the “pause then finish” feel of strong ease-out
-          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
-          fill: "both",
-          pseudoElement: "::view-transition-new(root)",
-        }
-      );
-
-      await Promise.all([animation.finished, transition.finished]);
+      await transition.finished;
     } catch {
       applyTheme(next);
     } finally {
+      removeStyle();
       animatingRef.current = false;
     }
   };
