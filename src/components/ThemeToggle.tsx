@@ -6,6 +6,7 @@ import { Moon, Sun } from "lucide-react";
 
 type Theme = "light" | "dark";
 
+const TRANSITION_MS = 900;
 const listeners = new Set<() => void>();
 
 function emitChange() {
@@ -41,7 +42,6 @@ function prefersReducedMotion() {
 
 function getToggleCenter(button: HTMLButtonElement) {
   const rect = button.getBoundingClientRect();
-  // Layout-viewport coords — must match the root VT snapshot box
   const x = rect.left + rect.width / 2;
   const y = rect.top + rect.height / 2;
   const endRadius = Math.hypot(
@@ -84,31 +84,40 @@ export function ThemeToggle() {
       return;
     }
 
+    // Capture before VT — literal px values (CSS vars don't inherit into VT
+    // pseudo-elements reliably in Chrome / some WebViews → falls back to 0,0)
     const { x, y, endRadius } = getToggleCenter(button);
-    const root = document.documentElement;
-
-    root.style.setProperty("--theme-toggle-x", `${x}px`);
-    root.style.setProperty("--theme-toggle-y", `${y}px`);
-    root.style.setProperty("--theme-toggle-r", `${endRadius}px`);
-    root.dataset.themeTransition = "true";
     animatingRef.current = true;
 
     try {
       const transition = document.startViewTransition(() => {
-        // Flush React so the "new" snapshot is the real next theme — avoids the hitch
         flushSync(() => {
           applyTheme(next);
         });
       });
 
-      await transition.finished;
+      await transition.ready;
+
+      const animation = document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`,
+          ],
+        },
+        {
+          duration: TRANSITION_MS,
+          // Smooth ease — avoids the “pause then finish” feel of strong ease-out
+          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+          fill: "both",
+          pseudoElement: "::view-transition-new(root)",
+        }
+      );
+
+      await Promise.all([animation.finished, transition.finished]);
     } catch {
       applyTheme(next);
     } finally {
-      delete root.dataset.themeTransition;
-      root.style.removeProperty("--theme-toggle-x");
-      root.style.removeProperty("--theme-toggle-y");
-      root.style.removeProperty("--theme-toggle-r");
       animatingRef.current = false;
     }
   };
