@@ -2,15 +2,17 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  Copy, 
-  Check, 
-  Mail, 
-  Phone, 
-  MapPin, 
+import {
+  Copy,
+  Check,
+  Mail,
+  Phone,
+  MapPin,
   ArrowUpRight,
-  Sparkles
+  Download,
+  Sparkles,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 function GithubIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
   return (
@@ -47,32 +49,45 @@ export default function Home() {
     "TypeScript",
     "Next.js",
     "Node.js",
-    "MongoDB"
+    "MongoDB",
   ];
 
   return (
-    <div className="h-screen h-[100dvh] w-full bg-[#050505] text-[#ededed] font-sans antialiased selection:bg-white/20 selection:text-white overflow-hidden flex flex-col justify-between relative p-4 sm:p-8">
-      
+    <div className="h-screen h-[100dvh] w-full bg-background text-foreground font-sans antialiased selection:bg-[var(--selection-bg)] selection:text-[var(--selection-fg)] overflow-hidden flex flex-col justify-between relative p-4 sm:p-8">
       {/* Top subtle hairline gradient */}
-      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
-      
+      <div
+        className="absolute top-0 inset-x-0 h-px pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to right, transparent, var(--hairline), transparent)",
+        }}
+      />
+
       {/* Background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-white/[0.025] blur-3xl pointer-events-none -z-10" />
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] blur-3xl pointer-events-none -z-10"
+        style={{ background: "var(--glow)" }}
+      />
 
       {/* HEADER / STATUS */}
-      <header className="max-w-xl w-full mx-auto flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-400 uppercase tracking-widest">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+      <header className="max-w-xl w-full mx-auto flex items-center justify-between shrink-0 gap-3">
+        <div className="flex items-center gap-2 text-[11px] font-mono text-muted uppercase tracking-widest">
+          <span
+            className="w-1.5 h-1.5 rounded-full animate-pulse"
+            style={{ background: "var(--status)" }}
+          />
           Available for Hire
         </div>
-        <div className="text-[11px] font-mono text-zinc-500">
-          3.6 Yrs Exp
+        <div className="flex items-center gap-3">
+          <div className="text-[11px] font-mono text-muted-soft">
+            3.6 Yrs Exp
+          </div>
+          <ThemeToggle />
         </div>
       </header>
 
       {/* MAIN SINGLE VIEWPORT HERO CONTENT */}
       <main className="max-w-xl w-full mx-auto flex flex-col justify-center gap-4 sm:gap-6 my-auto">
-        
         {/* ROLE BADGE & NAME */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -80,24 +95,43 @@ export default function Home() {
           transition={{ duration: 0.4 }}
           className="flex flex-col gap-2"
         >
-          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-zinc-800 bg-zinc-900/60 w-fit text-[11px] font-mono text-zinc-400">
-            <Sparkles className="w-3 h-3 text-amber-400" />
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border bg-badge w-fit text-[11px] font-mono text-muted">
+            <Sparkles
+              className="w-3 h-3"
+              style={{ color: "var(--accent-spark)" }}
+            />
             Full-Stack Expo & React Native Developer
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight">
-            Arun Kumar <span className="text-zinc-400">Bhardwaj</span>
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground leading-tight">
+            Arun Kumar <span className="text-muted">Bhardwaj</span>
           </h1>
         </motion.div>
 
-        {/* SUMMARY (EXPO & RN FOCUSED) */}
+        {/* SUMMARY */}
         <motion.p
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="text-xs sm:text-base text-zinc-300 font-normal leading-relaxed"
+          className="text-xs sm:text-base text-muted font-normal leading-relaxed"
         >
-          Full-Stack Mobile & Web Engineer with <strong className="text-white font-semibold">3.6 years of experience</strong>. Specialized in building high-performance cross-platform apps using <strong className="text-white font-semibold">React Native</strong> and modern <strong className="text-white font-semibold">Expo capabilities</strong> (EAS, custom native modules, config plugins), <strong className="text-white font-semibold">Next.js</strong>, along with working backend knowledge of <strong className="text-white font-semibold">Node.js & MongoDB</strong>.
+          Full-Stack Mobile & Web Engineer with{" "}
+          <strong className="text-foreground font-semibold">
+            3.6 years of experience
+          </strong>
+          . Specialized in building high-performance cross-platform apps using{" "}
+          <strong className="text-foreground font-semibold">React Native</strong>{" "}
+          and modern{" "}
+          <strong className="text-foreground font-semibold">
+            Expo capabilities
+          </strong>{" "}
+          (EAS, custom native modules, config plugins),{" "}
+          <strong className="text-foreground font-semibold">Next.js</strong>,
+          along with working backend knowledge of{" "}
+          <strong className="text-foreground font-semibold">
+            Node.js & MongoDB
+          </strong>
+          .
         </motion.p>
 
         {/* METRICS ROW */}
@@ -105,33 +139,45 @@ export default function Home() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className="grid grid-cols-3 gap-2 border-y border-zinc-800/80 py-3"
+          className="grid grid-cols-3 gap-2 border-y border-border/80 py-3"
         >
           <div className="flex flex-col">
-            <span className="text-base sm:text-xl font-mono font-semibold text-white">3.6 Yrs</span>
-            <span className="text-[10px] sm:text-xs text-zinc-500 font-mono">Experience</span>
+            <span className="text-base sm:text-xl font-mono font-semibold text-foreground">
+              3.6 Yrs
+            </span>
+            <span className="text-[10px] sm:text-xs text-muted-soft font-mono">
+              Experience
+            </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-base sm:text-xl font-mono font-semibold text-white">Expo & RN</span>
-            <span className="text-[10px] sm:text-xs text-zinc-500 font-mono">Mobile Ecosystem</span>
+            <span className="text-base sm:text-xl font-mono font-semibold text-foreground">
+              Expo & RN
+            </span>
+            <span className="text-[10px] sm:text-xs text-muted-soft font-mono">
+              Mobile Ecosystem
+            </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-base sm:text-xl font-mono font-semibold text-white">Node & Mongo</span>
-            <span className="text-[10px] sm:text-xs text-zinc-500 font-mono">Backend Knowledge</span>
+            <span className="text-base sm:text-xl font-mono font-semibold text-foreground">
+              Node & Mongo
+            </span>
+            <span className="text-[10px] sm:text-xs text-muted-soft font-mono">
+              Backend Knowledge
+            </span>
           </div>
         </motion.div>
 
-        {/* TECH STACK CHIPS (EXPO & RN TECH ONLY) */}
+        {/* TECH STACK CHIPS */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
           className="flex flex-wrap gap-1.5"
         >
-          {expoTechStack.map((item, idx) => (
+          {expoTechStack.map((item) => (
             <span
-              key={idx}
-              className="px-2.5 py-1 rounded bg-zinc-900/90 border border-zinc-800 text-[11px] font-mono text-zinc-300"
+              key={item}
+              className="px-2.5 py-1 rounded bg-surface border border-border text-[11px] font-mono text-muted"
             >
               {item}
             </span>
@@ -147,16 +193,16 @@ export default function Home() {
         >
           <button
             onClick={handleCopyEmail}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white text-black font-medium text-xs hover:bg-zinc-200 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-inverse text-inverse-fg font-medium text-xs hover:opacity-90 transition-opacity cursor-pointer"
           >
             {copied ? (
               <>
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500" />
                 <span className="font-semibold">Copied Email!</span>
               </>
             ) : (
               <>
-                <Mail className="w-3.5 h-3.5 text-black" />
+                <Mail className="w-3.5 h-3.5" />
                 <span>bhardwajarun38@gmail.com</span>
                 <Copy className="w-3 h-3 opacity-60 ml-0.5" />
               </>
@@ -165,37 +211,44 @@ export default function Home() {
 
           <a
             href="tel:+918859099380"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 hover:border-zinc-700 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface border border-border text-xs text-muted hover:border-border-strong hover:text-foreground transition-colors"
           >
-            <Phone className="w-3.5 h-3.5 text-zinc-400" />
+            <Phone className="w-3.5 h-3.5 text-muted-soft" />
             <span>+91 8859099380</span>
           </a>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900/50 border border-zinc-800/80 text-xs text-zinc-400">
-            <MapPin className="w-3.5 h-3.5 text-zinc-500" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-muted border border-border/80 text-xs text-muted">
+            <MapPin className="w-3.5 h-3.5 text-muted-soft" />
             <span>Uttarakhand</span>
           </div>
 
           <a
-            href="https://github.com"
+            href="https://github.com/ArunKumarBhardwaj"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 hover:border-zinc-700 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface border border-border text-xs text-muted hover:border-border-strong hover:text-foreground transition-colors"
           >
-            <GithubIcon className="w-3.5 h-3.5 text-zinc-400" />
+            <GithubIcon className="w-3.5 h-3.5 text-muted-soft" />
             <span>GitHub</span>
-            <ArrowUpRight className="w-3 h-3 text-zinc-500" />
+            <ArrowUpRight className="w-3 h-3 text-muted-soft" />
+          </a>
+
+          <a
+            href="/ARUN_RESUME.pdf"
+            download="ARUN_RESUME.pdf"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface border border-border text-xs text-muted hover:border-border-strong hover:text-foreground transition-colors"
+          >
+            <Download className="w-3.5 h-3.5 text-muted-soft" />
+            <span>Download Resume</span>
           </a>
         </motion.div>
-
       </main>
 
       {/* FOOTER */}
-      <footer className="max-w-xl w-full mx-auto text-[11px] font-mono text-zinc-600 flex justify-between items-center shrink-0">
+      <footer className="max-w-xl w-full mx-auto text-[11px] font-mono text-muted-soft flex justify-between items-center shrink-0">
         <span>Arun Kumar Bhardwaj</span>
         <span>© {new Date().getFullYear()}</span>
       </footer>
-
     </div>
   );
 }
