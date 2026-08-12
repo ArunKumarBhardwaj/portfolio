@@ -74,6 +74,41 @@ body {
   overflow-x: hidden;
 }
 
+/*
+  Theme circle wipe — MagicUI / Chrome-safe pattern:
+  - % clip-paths (px origins break on Chrome mobile / scaled displays)
+  - pin clip-from so new snapshot never flashes unclipped
+*/
+::view-transition-group(root) {
+  animation-duration: var(--theme-vt-duration, 650ms);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
+/* Hold collapsed circle until WAAPI starts (kills left-side flash) */
+html[data-theme-vt="active"]::view-transition-new(root) {
+  clip-path: var(--theme-vt-clip-from);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

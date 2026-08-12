@@ -1,16 +1,12 @@
 "use client";
 
 import { useRef, useSyncExternalStore } from "react";
+import { flushSync } from "react-dom";
 import { Moon, Sun } from "lucide-react";
 
 type Theme = "light" | "dark";
 
-const TRANSITION_MS = 900;
-const THEME_BG: Record<Theme, string> = {
-  light: "#f6f6f7",
-  dark: "#050505",
-};
-
+const TRANSITION_MS = 650;
 const listeners = new Set<() => void>();
 
 function emitChange() {
@@ -44,17 +40,6 @@ function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-function getToggleCenter(button: HTMLButtonElement) {
-  const rect = button.getBoundingClientRect();
-  const x = rect.left + rect.width / 2;
-  const y = rect.top + rect.height / 2;
-  const endRadius = Math.hypot(
-    Math.max(x, window.innerWidth - x),
-    Math.max(y, window.innerHeight - y)
-  );
-  return { x, y, endRadius };
-}
-
 function useIsClient() {
   return useSyncExternalStore(
     () => () => {},
@@ -64,52 +49,22 @@ function useIsClient() {
 }
 
 /**
- * Overlay circle wipe — no View Transitions API.
- * VT was inconsistent on Chrome/DDG (top-left origin, mid-pause jank).
+ * Percentage clip-paths — MagicUI/Chrome fix:
+ * absolute `px` on ::view-transition-new(root) often lands at the wrong
+ * origin (top-left) on mobile Chrome / scaled displays. Percentages resolve
+ * against the snapshot box and stay aligned with the toggle.
  */
-async function runCircleWipe(
-  button: HTMLButtonElement,
-  next: Theme
-): Promise<void> {
-  const { x, y, endRadius } = getToggleCenter(button);
-
-  const overlay = document.createElement("div");
-  overlay.setAttribute("aria-hidden", "true");
-  overlay.style.cssText = `
-    position: fixed;
-    inset: 0;
-    z-index: 2147483646;
-    pointer-events: none;
-    background: ${THEME_BG[next]};
-    clip-path: circle(0px at ${x}px ${y}px);
-    will-change: clip-path;
-    transform: translateZ(0);
-  `;
-  document.body.appendChild(overlay);
-
-  // Ensure initial clip is painted before animating
-  overlay.getBoundingClientRect();
-
-  const animation = overlay.animate(
-    [
-      { clipPath: `circle(0px at ${x}px ${y}px)` },
-      { clipPath: `circle(${endRadius}px at ${x}px ${y}px)` },
-    ],
-    {
-      duration: TRANSITION_MS,
-      easing: "cubic-bezier(0.4, 0, 0.2, 1)",
-      fill: "forwards",
-    }
-  );
-
-  try {
-    await animation.finished;
-  } catch {
-    // aborted
-  }
-
-  applyTheme(next);
-  overlay.remove();
+function getCircleClipPaths(cx: number, cy: number, maxRadius: number) {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const x = `${(cx / vw) * 100}%`;
+  const y = `${(cy / vh) * 100}%`;
+  // circle() % radius resolves against hypot(w,h)/√2 of the reference box
+  const r = `${(maxRadius / (Math.hypot(vw, vh) / Math.SQRT2)) * 100}%`;
+  return [
+    `circle(0% at ${x} ${y})`,
+    `circle(${r} at ${x} ${y})`,
+  ] as const;
 }
 
 export function ThemeToggle() {
@@ -127,19 +82,63 @@ export function ThemeToggle() {
 
     const next: Theme = theme === "dark" ? "light" : "dark";
     const button = buttonRef.current;
+    const root = document.documentElement;
 
-    if (!button || prefersReducedMotion()) {
+    if (
+      !button ||
+      typeof document.startViewTransition !== "function" ||
+      prefersReducedMotion()
+    ) {
       applyTheme(next);
       return;
     }
 
+    const { top, left, width, height } = button.getBoundingClientRect();
+    const cx = left + width / 2;
+    const cy = top + height / 2;
+    const maxRadius = Math.hypot(
+      Math.max(cx, window.innerWidth - cx),
+      Math.max(cy, window.innerHeight - cy)
+    );
+    const clipPath = getCircleClipPaths(cx, cy, maxRadius);
+
     animatingRef.current = true;
+    // Pin collapsed clip BEFORE VT so the new snapshot never paints unclipped
+    root.dataset.themeVt = "active";
+    root.style.setProperty("--theme-vt-clip-from", clipPath[0]);
+    root.style.setProperty("--theme-vt-duration", `${TRANSITION_MS}ms`);
+
+    const cleanup = () => {
+      delete root.dataset.themeVt;
+      root.style.removeProperty("--theme-vt-clip-from");
+      root.style.removeProperty("--theme-vt-duration");
+      animatingRef.current = false;
+    };
+
     try {
-      await runCircleWipe(button, next);
+      const transition = document.startViewTransition(() => {
+        flushSync(() => {
+          applyTheme(next);
+        });
+      });
+
+      await transition.ready;
+
+      const animation = root.animate(
+        { clipPath: [...clipPath] },
+        {
+          duration: TRANSITION_MS,
+          easing: "ease-in-out",
+          fill: "forwards",
+          pseudoElement: "::view-transition-new(root)",
+        }
+      );
+
+      await Promise.all([animation.finished, transition.finished]);
     } catch {
       applyTheme(next);
     } finally {
-      animatingRef.current = false;
+      cleanup();
     }
   };
 
