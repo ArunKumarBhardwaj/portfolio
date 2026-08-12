@@ -1,12 +1,16 @@
 "use client";
 
 import { useRef, useSyncExternalStore } from "react";
-import { flushSync } from "react-dom";
 import { Moon, Sun } from "lucide-react";
 
 type Theme = "light" | "dark";
 
 const TRANSITION_MS = 900;
+const THEME_BG: Record<Theme, string> = {
+  light: "#f6f6f7",
+  dark: "#050505",
+};
+
 const listeners = new Set<() => void>();
 
 function emitChange() {
@@ -51,41 +55,61 @@ function getToggleCenter(button: HTMLButtonElement) {
   return { x, y, endRadius };
 }
 
-/**
- * Inject keyframes with literal px coords BEFORE startViewTransition.
- * Waiting for transition.ready + WAAPI leaves frames where the new root is
- * unclipped (looks like top-left flash + pause), and CSS vars on <html> do not
- * reliably inherit into ::view-transition-* in Chrome / DDG.
- */
-function installCircleTransitionStyle(x: number, y: number, endRadius: number) {
-  const style = document.createElement("style");
-  const name = `theme-circle-${Math.round(x)}-${Math.round(y)}-${Date.now()}`;
-  style.dataset.themeTransition = "true";
-  style.textContent = `
-    @keyframes ${name} {
-      from {
-        clip-path: circle(0px at ${x}px ${y}px);
-      }
-      to {
-        clip-path: circle(${endRadius}px at ${x}px ${y}px);
-      }
-    }
-    ::view-transition-new(root) {
-      animation: ${name} ${TRANSITION_MS}ms cubic-bezier(0.4, 0, 0.2, 1) both !important;
-    }
-  `;
-  document.head.appendChild(style);
-  return () => {
-    style.remove();
-  };
-}
-
 function useIsClient() {
   return useSyncExternalStore(
     () => () => {},
     () => true,
     () => false
   );
+}
+
+/**
+ * Overlay circle wipe — no View Transitions API.
+ * VT was inconsistent on Chrome/DDG (top-left origin, mid-pause jank).
+ */
+async function runCircleWipe(
+  button: HTMLButtonElement,
+  next: Theme
+): Promise<void> {
+  const { x, y, endRadius } = getToggleCenter(button);
+
+  const overlay = document.createElement("div");
+  overlay.setAttribute("aria-hidden", "true");
+  overlay.style.cssText = `
+    position: fixed;
+    inset: 0;
+    z-index: 2147483646;
+    pointer-events: none;
+    background: ${THEME_BG[next]};
+    clip-path: circle(0px at ${x}px ${y}px);
+    will-change: clip-path;
+    transform: translateZ(0);
+  `;
+  document.body.appendChild(overlay);
+
+  // Ensure initial clip is painted before animating
+  overlay.getBoundingClientRect();
+
+  const animation = overlay.animate(
+    [
+      { clipPath: `circle(0px at ${x}px ${y}px)` },
+      { clipPath: `circle(${endRadius}px at ${x}px ${y}px)` },
+    ],
+    {
+      duration: TRANSITION_MS,
+      easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+      fill: "forwards",
+    }
+  );
+
+  try {
+    await animation.finished;
+  } catch {
+    // aborted
+  }
+
+  applyTheme(next);
+  overlay.remove();
 }
 
 export function ThemeToggle() {
@@ -104,31 +128,17 @@ export function ThemeToggle() {
     const next: Theme = theme === "dark" ? "light" : "dark";
     const button = buttonRef.current;
 
-    if (
-      !button ||
-      !("startViewTransition" in document) ||
-      prefersReducedMotion()
-    ) {
+    if (!button || prefersReducedMotion()) {
       applyTheme(next);
       return;
     }
 
-    const { x, y, endRadius } = getToggleCenter(button);
     animatingRef.current = true;
-    const removeStyle = installCircleTransitionStyle(x, y, endRadius);
-
     try {
-      const transition = document.startViewTransition(() => {
-        flushSync(() => {
-          applyTheme(next);
-        });
-      });
-
-      await transition.finished;
+      await runCircleWipe(button, next);
     } catch {
       applyTheme(next);
     } finally {
-      removeStyle();
       animatingRef.current = false;
     }
   };
