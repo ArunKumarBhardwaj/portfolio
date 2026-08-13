@@ -129,12 +129,15 @@ export function ThemeToggle() {
         {
           duration: TRANSITION_MS,
           easing: "ease-in-out",
-          fill: "forwards",
+          // Do not use fill:forwards — it keeps the VT overlay alive and
+          // delays the next toggle until the browser times out.
           pseudoElement: "::view-transition-new(root)",
         }
       );
 
-      await Promise.all([animation.finished, transition.finished]);
+      await animation.finished;
+      animation.cancel();
+      transition.skipTransition();
     } catch {
       applyTheme(next);
     } finally {
