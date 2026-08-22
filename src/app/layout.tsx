@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Arun Kumar Bhardwaj | Full-Stack Expo & React Native Developer",
   description:
-    "Full-Stack Mobile & Web Engineer with 3.6 years of experience specializing in React Native, Expo (EAS, custom native modules, config plugins), Next.js, Node.js, and MongoDB.",
+    "Software Engineer at iTechnolabs. Full-Stack Mobile & Web Engineer with 3.6 years of experience specializing in React Native, Expo (EAS, custom native modules, config plugins), Next.js, Node.js, and MongoDB.",
   icons: {
     icon: "/icon.svg",
   },

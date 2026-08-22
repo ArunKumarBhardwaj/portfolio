@@ -71,13 +71,24 @@ export default function Home() {
 
       {/* HEADER / STATUS */}
       <header className="max-w-xl w-full mx-auto flex items-center justify-between shrink-0 gap-3">
-        <div className="flex items-center gap-2 text-[11px] font-mono text-muted uppercase tracking-widest">
+        <a
+          href="https://www.linkedin.com/company/itechnolabs-ca/posts/?feedView=all"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-[11px] font-mono text-muted hover:text-foreground transition-colors group"
+        >
           <span
             className="w-1.5 h-1.5 rounded-full animate-pulse"
             style={{ background: "var(--status)" }}
           />
-          Available for Hire
-        </div>
+          <span>
+            Software Engineer @{" "}
+            <span className="font-semibold text-foreground underline decoration-border group-hover:decoration-foreground">
+              iTechnolabs
+            </span>
+          </span>
+          <ArrowUpRight className="w-3 h-3 text-muted-soft group-hover:text-foreground transition-colors" />
+        </a>
         <div className="flex items-center gap-3">
           <div className="text-[11px] font-mono text-muted-soft">
             3.6 Yrs Exp
@@ -115,7 +126,21 @@ export default function Home() {
           transition={{ duration: 0.4, delay: 0.1 }}
           className="text-xs sm:text-base text-muted font-normal leading-relaxed"
         >
-          Full-Stack Mobile & Web Engineer with{" "}
+          Currently working as a{" "}
+          <strong className="text-foreground font-semibold">
+            Software Engineer
+          </strong>{" "}
+          at{" "}
+          <a
+            href="https://www.linkedin.com/company/itechnolabs-ca/posts/?feedView=all"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground font-semibold underline underline-offset-4 decoration-border hover:decoration-foreground transition-colors inline-flex items-center gap-0.5 group"
+          >
+            <span>iTechnolabs</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-muted-soft group-hover:text-foreground transition-colors inline" />
+          </a>
+          . Full-Stack Mobile & Web Engineer with{" "}
           <strong className="text-foreground font-semibold">
             3.6 years of experience
           </strong>
