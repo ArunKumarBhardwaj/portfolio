@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Copy,
@@ -31,7 +29,7 @@ function GithubIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
   );
 }
 
-export default function Home() {
+export function Portfolio() {
   const [copied, setCopied] = useState(false);
 
   const handleCopyEmail = () => {
@@ -53,7 +51,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="h-screen h-[100dvh] w-full bg-background text-foreground font-sans antialiased selection:bg-[var(--selection-bg)] selection:text-[var(--selection-fg)] overflow-hidden flex flex-col justify-between relative p-4 sm:p-8">
+    <div className="min-h-[100dvh] h-[100dvh] w-full bg-background text-foreground font-sans antialiased selection:bg-[var(--selection-bg)] selection:text-[var(--selection-fg)] overflow-x-hidden overflow-y-auto sm:overflow-hidden flex flex-col justify-between relative px-4 py-4 sm:p-8">
       {/* Top subtle hairline gradient */}
       <div
         className="absolute top-0 inset-x-0 h-px pointer-events-none"
@@ -65,32 +63,40 @@ export default function Home() {
 
       {/* Background glow */}
       <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] blur-3xl pointer-events-none -z-10"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(500px,100vw)] h-[250px] blur-3xl pointer-events-none -z-10"
         style={{ background: "var(--glow)" }}
       />
 
       {/* HEADER / STATUS */}
-      <header className="max-w-xl w-full mx-auto flex items-center justify-between shrink-0 gap-3">
+      <header className="max-w-xl w-full mx-auto flex items-center justify-between shrink-0 gap-2 sm:gap-3">
         <a
           href="https://www.linkedin.com/company/itechnolabs-ca/posts/?feedView=all"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-[11px] font-mono text-muted hover:text-foreground transition-colors group"
+          className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1 text-[10px] sm:text-[11px] font-mono text-muted hover:text-foreground transition-colors group"
         >
           <span
-            className="w-1.5 h-1.5 rounded-full animate-pulse"
+            className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0"
             style={{ background: "var(--status)" }}
           />
-          <span>
-            Software Engineer @{" "}
-            <span className="font-semibold text-foreground underline decoration-border group-hover:decoration-foreground">
-              iTechnolabs
+          <span className="truncate">
+            <span className="sm:hidden">
+              Eng @{" "}
+              <span className="font-semibold text-foreground underline decoration-border group-hover:decoration-foreground">
+                iTechnolabs
+              </span>
+            </span>
+            <span className="hidden sm:inline">
+              Software Engineer @{" "}
+              <span className="font-semibold text-foreground underline decoration-border group-hover:decoration-foreground">
+                iTechnolabs
+              </span>
             </span>
           </span>
-          <ArrowUpRight className="w-3 h-3 text-muted-soft group-hover:text-foreground transition-colors" />
+          <ArrowUpRight className="w-3 h-3 text-muted-soft group-hover:text-foreground transition-colors shrink-0" />
         </a>
-        <div className="flex items-center gap-3">
-          <div className="text-[11px] font-mono text-muted-soft">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="hidden min-[400px]:block text-[10px] sm:text-[11px] font-mono text-muted-soft whitespace-nowrap">
             3.6 Yrs Exp
           </div>
           <ThemeToggle />
@@ -98,7 +104,7 @@ export default function Home() {
       </header>
 
       {/* MAIN SINGLE VIEWPORT HERO CONTENT */}
-      <main className="max-w-xl w-full mx-auto flex flex-col justify-center gap-4 sm:gap-6 my-auto">
+      <main className="max-w-xl w-full mx-auto flex flex-col justify-center gap-3 sm:gap-6 my-auto py-4 sm:py-0 min-h-0">
         {/* ROLE BADGE & NAME */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -106,15 +112,17 @@ export default function Home() {
           transition={{ duration: 0.4 }}
           className="flex flex-col gap-2"
         >
-          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border bg-badge w-fit text-[11px] font-mono text-muted">
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border bg-badge w-fit max-w-full text-[10px] sm:text-[11px] font-mono text-muted">
             <Sparkles
-              className="w-3 h-3"
+              className="w-3 h-3 shrink-0"
               style={{ color: "var(--accent-spark)" }}
             />
-            Full-Stack Expo & React Native Developer
+            <span className="truncate">
+              Full-Stack Expo & React Native Developer
+            </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground leading-tight">
+          <h1 className="text-[1.75rem] leading-tight sm:text-5xl font-bold tracking-tight text-foreground sm:leading-tight">
             Arun Kumar <span className="text-muted">Bhardwaj</span>
           </h1>
         </motion.div>
@@ -164,30 +172,32 @@ export default function Home() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className="grid grid-cols-3 gap-2 border-y border-border/80 py-3"
+          className="grid grid-cols-3 gap-1.5 sm:gap-2 border-y border-border/80 py-2.5 sm:py-3"
         >
-          <div className="flex flex-col">
-            <span className="text-base sm:text-xl font-mono font-semibold text-foreground">
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm sm:text-xl font-mono font-semibold text-foreground">
               3.6 Yrs
             </span>
-            <span className="text-[10px] sm:text-xs text-muted-soft font-mono">
+            <span className="text-[9px] sm:text-xs text-muted-soft font-mono">
               Experience
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-base sm:text-xl font-mono font-semibold text-foreground">
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm sm:text-xl font-mono font-semibold text-foreground">
               Expo & RN
             </span>
-            <span className="text-[10px] sm:text-xs text-muted-soft font-mono">
-              Mobile Ecosystem
+            <span className="text-[9px] sm:text-xs text-muted-soft font-mono">
+              Mobile
+              <span className="hidden sm:inline"> Ecosystem</span>
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-base sm:text-xl font-mono font-semibold text-foreground">
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm sm:text-xl font-mono font-semibold text-foreground">
               Node & Mongo
             </span>
-            <span className="text-[10px] sm:text-xs text-muted-soft font-mono">
-              Backend Knowledge
+            <span className="text-[9px] sm:text-xs text-muted-soft font-mono">
+              Backend
+              <span className="hidden sm:inline"> Knowledge</span>
             </span>
           </div>
         </motion.div>
@@ -218,18 +228,21 @@ export default function Home() {
         >
           <button
             onClick={handleCopyEmail}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-inverse text-inverse-fg font-medium text-xs hover:opacity-90 transition-opacity cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-inverse text-inverse-fg font-medium text-xs hover:opacity-90 transition-opacity cursor-pointer max-w-full"
           >
             {copied ? (
               <>
-                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500" />
+                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500 shrink-0" />
                 <span className="font-semibold">Copied Email!</span>
               </>
             ) : (
               <>
-                <Mail className="w-3.5 h-3.5" />
-                <span>bhardwajarun38@gmail.com</span>
-                <Copy className="w-3 h-3 opacity-60 ml-0.5" />
+                <Mail className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate sm:hidden">Copy Email</span>
+                <span className="hidden sm:inline truncate">
+                  bhardwajarun38@gmail.com
+                </span>
+                <Copy className="w-3 h-3 opacity-60 ml-0.5 shrink-0" />
               </>
             )}
           </button>
@@ -270,9 +283,9 @@ export default function Home() {
       </main>
 
       {/* FOOTER */}
-      <footer className="max-w-xl w-full mx-auto text-[11px] font-mono text-muted-soft flex justify-between items-center shrink-0">
-        <span>Arun Kumar Bhardwaj</span>
-        <span>© {new Date().getFullYear()}</span>
+      <footer className="max-w-xl w-full mx-auto text-[10px] sm:text-[11px] font-mono text-muted-soft flex justify-between items-center shrink-0 gap-2">
+        <span className="truncate">Arun Kumar Bhardwaj</span>
+        <span className="shrink-0">© {new Date().getFullYear()}</span>
       </footer>
     </div>
   );

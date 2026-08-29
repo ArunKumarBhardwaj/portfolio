@@ -1,5 +1,5 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# Astro portfolio agent notes
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+This is an Astro project with React islands. Prefer Astro docs and `@astrojs/react` patterns over Next.js App Router conventions.
+
+Interactive UI lives in `src/components/*.tsx` and is hydrated from `.astro` pages with `client:*` directives.

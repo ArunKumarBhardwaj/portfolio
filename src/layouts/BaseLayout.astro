@@ -1,0 +1,38 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Arun Kumar Bhardwaj | Full-Stack Expo & React Native Developer",
+  description = "Software Engineer at iTechnolabs. Full-Stack Mobile & Web Engineer with 3.6 years of experience specializing in React Native, Expo (EAS, custom native modules, config plugins), Next.js, Node.js, and MongoDB.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="h-full antialiased dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <title>{title}</title>
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem("theme");
+          const theme =
+            stored === "light" || stored === "dark" ? stored : "dark";
+          document.documentElement.classList.toggle("dark", theme === "dark");
+        } catch (_) {}
+      })();
+    </script>
+  </head>
+  <body class="min-h-full flex flex-col bg-background text-foreground">
+    <slot />
+  </body>
+</html>
