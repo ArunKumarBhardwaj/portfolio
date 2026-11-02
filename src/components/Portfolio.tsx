@@ -1,292 +1,542 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import {
-  Copy,
-  Check,
-  Mail,
-  Phone,
-  MapPin,
-  ArrowUpRight,
-  Download,
-  Sparkles,
-} from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { ArrowUpRight, Check, Copy } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-function GithubIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
+/* ------------------------------------------------------------------ */
+/* Content                                                             */
+/* ------------------------------------------------------------------ */
+
+const EMAIL = "bhardwajarun38@gmail.com";
+const PHONE = "+91 8859099380";
+const LINKS = {
+  github: "https://github.com/ArunKumarBhardwaj",
+  linkedin: "https://www.linkedin.com/in/arun-bhardwaj-b1828b210",
+  company: "https://www.linkedin.com/company/itechnolabs-ca/posts/?feedView=all",
+  resume: "/ARUN_RESUME.pdf",
+};
+
+type Project = {
+  name: string;
+  summary: string;
+  stack: string;
+  links?: { label: string; href: string }[];
+};
+
+const PROJECTS: Project[] = [
+  {
+    name: "Mergata",
+    summary:
+      "Community app for the Albanian diaspora — live border wait times, rideshares, jobs and housing. Geofencing prompts travellers for crowdsourced reports.",
+    stack: "Expo · Geofencing · Maps",
+    links: [
+      {
+        label: "Play Store",
+        href: "https://play.google.com/store/apps/details?id=com.mergata.ride.app",
+      },
+      {
+        label: "App Store",
+        href: "https://apps.apple.com/in/app/mergata/id6753675571",
+      },
+    ],
+  },
+  {
+    name: "Swivics",
+    summary:
+      "Corporate mobility platform with recurring rides. Background location that survives Android Doze and OEM battery killers on Samsung, Xiaomi and Oppo.",
+    stack: "Expo · Background location · Maps",
+    links: [
+      {
+        label: "Customer app",
+        href: "https://apps.apple.com/us/app/swivics/id6759370893",
+      },
+      {
+        label: "Driver app",
+        href: "https://apps.apple.com/us/app/swivics-driver/id6759370949",
+      },
+    ],
+  },
+  {
+    name: "WedSuite",
+    summary:
+      "Wedding planning app with a streaming AI assistant (SSE, RAG over a vector DB), RevenueCat subscriptions, budgets, RSVPs and calendar sync.",
+    stack: "React Native · SSE · RevenueCat",
+  },
+  {
+    name: "Mezzo",
+    summary:
+      "E-scooter rentals with live telemetry from Teltonika IoT devices over WebSockets, geofenced parking and Stripe pay-as-you-go wallets.",
+    stack: "Expo · WebSockets · Stripe",
+  },
+  {
+    name: "POV",
+    summary:
+      "Short-video social app — HLS reels and stories with prefetching for instant playback, FFmpeg compression and background uploads.",
+    stack: "React Native · HLS · FFmpeg",
+  },
+];
+
+const EXPERIENCE = [
+  {
+    period: "Oct 2024 — Now",
+    role: "Software Engineer",
+    company: "iTechnolabs",
+    href: LINKS.company,
+    note: "Own EAS build and release pipelines; 99.9% crash-free across releases.",
+  },
+  {
+    period: "May 2023 — Sep 2024",
+    role: "Freelance Next.js Developer",
+    company: "Asterism Advisory",
+    note: "Marketing site on Next.js + Sanity, rate-limited Resend contact flow.",
+  },
+  {
+    period: "Jan 2023 — Apr 2023",
+    role: "Software Development Engineer I",
+    company: "Veative Labs",
+    note: "1:1 and group video learning sessions with GetStream on React Native.",
+  },
+  {
+    period: "Apr 2021 — Oct 2022",
+    role: "React Native Developer",
+    company: "SheThink",
+    note: "Shipped client apps end-to-end, including both store submissions.",
+  },
+];
+
+const STACK = [
+  {
+    group: "Mobile",
+    items:
+      "React Native, Expo, EAS Build & Submit, custom native modules, config plugins, Xcode, Android Studio",
+  },
+  {
+    group: "Web",
+    items: "TypeScript, React, Next.js, Tailwind CSS, Node.js",
+  },
+  {
+    group: "Data & services",
+    items: "REST, GraphQL, WebSockets, Firebase, Supabase, Convex, MongoDB, Stripe",
+  },
+];
+
+/* ------------------------------------------------------------------ */
+/* Motion                                                              */
+/* ------------------------------------------------------------------ */
+
+const EASE_OUT = [0.16, 1, 0.3, 1] as const; // ease-out-expo
+
+/** A line of display type that rises out of a mask. */
+function MaskLine({
+  children,
+  delay,
+}: {
+  children: ReactNode;
+  delay: number;
+}) {
+  const reduce = useReducedMotion();
   return (
-    <svg
-      className={className}
-      fill="currentColor"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <path
-        fillRule="evenodd"
-        d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-        clipRule="evenodd"
-      />
-    </svg>
+    <span className="block overflow-hidden pb-[0.08em] -mb-[0.08em]">
+      <motion.span
+        className="block"
+        initial={reduce ? false : { y: "105%" }}
+        animate={{ y: 0 }}
+        transition={{ duration: 1.1, ease: EASE_OUT, delay }}
+      >
+        {children}
+      </motion.span>
+    </span>
   );
 }
 
-export function Portfolio() {
+/** Fades content up once when scrolled into view. */
+function Reveal({
+  children,
+  delay = 0,
+  className,
+}: {
+  children: ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div
+      className={className}
+      initial={reduce ? false : { opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "0px 0px -10% 0px" }}
+      transition={{ duration: 0.8, ease: EASE_OUT, delay }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/** A hairline that draws from left to right when it enters view. */
+function Rule({ delay = 0 }: { delay?: number }) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div
+      aria-hidden
+      className="h-px w-full bg-border origin-left"
+      initial={reduce ? false : { scaleX: 0 }}
+      whileInView={{ scaleX: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 1.2, ease: EASE_OUT, delay }}
+    />
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Small pieces                                                        */
+/* ------------------------------------------------------------------ */
+
+function LocalTime() {
+  const [time, setTime] = useState<string | null>(null);
+  useEffect(() => {
+    const fmt = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Asia/Kolkata",
+    });
+    const tick = () => setTime(fmt.format(new Date()));
+    tick();
+    const id = setInterval(tick, 15_000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <span className="tabular-nums" suppressHydrationWarning>
+      {time ?? "--:--"} IST
+    </span>
+  );
+}
+
+function CopyEmail({ className = "" }: { className?: string }) {
   const [copied, setCopied] = useState(false);
-
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText("bhardwajarun38@gmail.com");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(EMAIL);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      window.location.href = `mailto:${EMAIL}`;
+    }
   };
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className={`inline-flex items-center gap-1.5 font-mono text-xs text-muted hover:text-foreground transition-colors cursor-pointer ${className}`}
+      aria-live="polite"
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={copied ? "y" : "n"}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.18 }}
+          className="inline-flex items-center gap-1.5"
+        >
+          {copied ? (
+            <>
+              <Check className="w-3.5 h-3.5 text-signal" /> Copied
+            </>
+          ) : (
+            <>
+              <Copy className="w-3.5 h-3.5" /> Copy email
+            </>
+          )}
+        </motion.span>
+      </AnimatePresence>
+    </button>
+  );
+}
 
-  const expoTechStack = [
-    "React Native",
-    "Expo",
-    "EAS Build & Deploy",
-    "Custom Native Modules",
-    "Config Plugins",
-    "TypeScript",
-    "Next.js",
-    "Node.js",
-    "MongoDB",
-  ];
+function SectionHead({ title, aside }: { title: string; aside?: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 pb-4">
+      <h2 className="font-display text-xl sm:text-2xl font-semibold tracking-tight">
+        {title}
+      </h2>
+      {aside && (
+        <span className="font-mono text-xs text-muted-soft">{aside}</span>
+      )}
+    </div>
+  );
+}
+
+function ExternalLink({
+  href,
+  children,
+  className = "",
+}: {
+  href: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`group inline-flex items-center gap-1 hover:text-signal transition-colors ${className}`}
+    >
+      {children}
+      <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+    </a>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
+
+export function Portfolio() {
+  const reduce = useReducedMotion();
 
   return (
-    <div className="min-h-[100dvh] h-[100dvh] w-full bg-background text-foreground font-sans antialiased selection:bg-[var(--selection-bg)] selection:text-[var(--selection-fg)] overflow-x-hidden overflow-y-auto sm:overflow-hidden flex flex-col justify-between relative px-4 py-4 sm:p-8">
-      {/* Top subtle hairline gradient */}
-      <div
-        className="absolute top-0 inset-x-0 h-px pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(to right, transparent, var(--hairline), transparent)",
-        }}
-      />
-
-      {/* Background glow */}
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(500px,100vw)] h-[250px] blur-3xl pointer-events-none -z-10"
-        style={{ background: "var(--glow)" }}
-      />
-
-      {/* HEADER / STATUS */}
-      <header className="max-w-xl w-full mx-auto flex items-center justify-between shrink-0 gap-2 sm:gap-3">
-        <a
-          href="https://www.linkedin.com/company/itechnolabs-ca/posts/?feedView=all"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1 text-[10px] sm:text-[11px] font-mono text-muted hover:text-foreground transition-colors group"
+    <div className="min-h-[100dvh] w-full bg-background text-foreground antialiased selection:bg-[var(--selection-bg)] selection:text-[var(--selection-fg)]">
+      <div className="mx-auto w-full max-w-5xl px-5 sm:px-10">
+        {/* ---------- Top bar ---------- */}
+        <motion.header
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.9 }}
+          className="flex items-center justify-between gap-4 py-5 sm:py-7 font-mono text-[11px] sm:text-xs text-muted"
         >
-          <span
-            className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0"
-            style={{ background: "var(--status)" }}
-          />
-          <span className="truncate">
-            <span className="sm:hidden">
-              Eng @{" "}
-              <span className="font-semibold text-foreground underline decoration-border group-hover:decoration-foreground">
-                iTechnolabs
-              </span>
-            </span>
-            <span className="hidden sm:inline">
-              Software Engineer @{" "}
-              <span className="font-semibold text-foreground underline decoration-border group-hover:decoration-foreground">
-                iTechnolabs
-              </span>
-            </span>
-          </span>
-          <ArrowUpRight className="w-3 h-3 text-muted-soft group-hover:text-foreground transition-colors shrink-0" />
-        </a>
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <div className="hidden min-[400px]:block text-[10px] sm:text-[11px] font-mono text-muted-soft whitespace-nowrap">
-            3.6 Yrs Exp
+          <span className="text-foreground">AKB</span>
+          <div className="flex items-center gap-4 sm:gap-6">
+            <span className="hidden sm:inline">Chandigarh, India</span>
+            <LocalTime />
+            <ThemeToggle />
           </div>
-          <ThemeToggle />
-        </div>
-      </header>
+        </motion.header>
 
-      {/* MAIN SINGLE VIEWPORT HERO CONTENT */}
-      <main className="max-w-xl w-full mx-auto flex flex-col justify-center gap-3 sm:gap-6 my-auto py-4 sm:py-0 min-h-0">
-        {/* ROLE BADGE & NAME */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="flex flex-col gap-2"
-        >
-          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border bg-badge w-fit max-w-full text-[10px] sm:text-[11px] font-mono text-muted">
-            <Sparkles
-              className="w-3 h-3 shrink-0"
-              style={{ color: "var(--accent-spark)" }}
-            />
-            <span className="truncate">
-              Full-Stack Expo & React Native Developer
-            </span>
-          </div>
-
-          <h1 className="text-[1.75rem] leading-tight sm:text-5xl font-bold tracking-tight text-foreground sm:leading-tight">
-            Arun Kumar <span className="text-muted">Bhardwaj</span>
+        {/* ---------- Hero ---------- */}
+        <section className="pt-[12vh] sm:pt-[16vh] pb-16 sm:pb-24">
+          <h1 className="font-display font-semibold tracking-[-0.035em] leading-[0.92] text-[clamp(3.25rem,13vw,9.5rem)]">
+            <MaskLine delay={0.1}>Arun Kumar</MaskLine>
+            <MaskLine delay={0.22}>
+              Bhardwaj<span className="text-signal">.</span>
+            </MaskLine>
           </h1>
-        </motion.div>
 
-        {/* SUMMARY */}
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="text-xs sm:text-base text-muted font-normal leading-relaxed"
-        >
-          Currently working as a{" "}
-          <strong className="text-foreground font-semibold">
-            Software Engineer
-          </strong>{" "}
-          at{" "}
-          <a
-            href="https://www.linkedin.com/company/itechnolabs-ca/posts/?feedView=all"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-foreground font-semibold underline underline-offset-4 decoration-border hover:decoration-foreground transition-colors inline-flex items-center gap-0.5 group"
-          >
-            <span>iTechnolabs</span>
-            <ArrowUpRight className="w-3.5 h-3.5 text-muted-soft group-hover:text-foreground transition-colors inline" />
-          </a>
-          . Full-Stack Mobile & Web Engineer with{" "}
-          <strong className="text-foreground font-semibold">
-            3.6 years of experience
-          </strong>
-          . Specialized in building high-performance cross-platform apps using{" "}
-          <strong className="text-foreground font-semibold">React Native</strong>{" "}
-          and modern{" "}
-          <strong className="text-foreground font-semibold">
-            Expo capabilities
-          </strong>{" "}
-          (EAS, custom native modules, config plugins),{" "}
-          <strong className="text-foreground font-semibold">Next.js</strong>,
-          along with working backend knowledge of{" "}
-          <strong className="text-foreground font-semibold">
-            Node.js & MongoDB
-          </strong>
-          .
-        </motion.p>
-
-        {/* METRICS ROW */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="grid grid-cols-3 gap-1.5 sm:gap-2 border-y border-border/80 py-2.5 sm:py-3"
-        >
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm sm:text-xl font-mono font-semibold text-foreground">
-              3.6 Yrs
-            </span>
-            <span className="text-[9px] sm:text-xs text-muted-soft font-mono">
-              Experience
-            </span>
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm sm:text-xl font-mono font-semibold text-foreground">
-              Expo & RN
-            </span>
-            <span className="text-[9px] sm:text-xs text-muted-soft font-mono">
-              Mobile
-              <span className="hidden sm:inline"> Ecosystem</span>
-            </span>
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm sm:text-xl font-mono font-semibold text-foreground">
-              Node & Mongo
-            </span>
-            <span className="text-[9px] sm:text-xs text-muted-soft font-mono">
-              Backend
-              <span className="hidden sm:inline"> Knowledge</span>
-            </span>
-          </div>
-        </motion.div>
-
-        {/* TECH STACK CHIPS */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="flex flex-wrap gap-1.5"
-        >
-          {expoTechStack.map((item) => (
-            <span
-              key={item}
-              className="px-2.5 py-1 rounded bg-surface border border-border text-[11px] font-mono text-muted"
+          <div className="mt-10 sm:mt-14 grid gap-8 sm:grid-cols-[1fr_auto] sm:items-end">
+            <motion.p
+              initial={reduce ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: EASE_OUT, delay: 0.55 }}
+              className="max-w-[34rem] text-lg sm:text-xl leading-relaxed text-muted"
             >
-              {item}
-            </span>
-          ))}
-        </motion.div>
+              I build iOS and Android apps with{" "}
+              <span className="text-foreground">React Native and Expo</span>{" "}
+              — from the first screen through EAS builds to the store review.
+              3 years and 10 months in, currently a software engineer at{" "}
+              <a
+                href={LINKS.company}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground underline decoration-border-strong underline-offset-4 hover:decoration-signal transition-colors"
+              >
+                iTechnolabs
+              </a>
+              .
+            </motion.p>
 
-        {/* CONTACT & SOCIAL ACTIONS */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
-          className="flex flex-wrap items-center gap-2 pt-1"
-        >
-          <button
-            onClick={handleCopyEmail}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-inverse text-inverse-fg font-medium text-xs hover:opacity-90 transition-opacity cursor-pointer max-w-full"
-          >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500 shrink-0" />
-                <span className="font-semibold">Copied Email!</span>
-              </>
-            ) : (
-              <>
-                <Mail className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate sm:hidden">Copy Email</span>
-                <span className="hidden sm:inline truncate">
-                  bhardwajarun38@gmail.com
-                </span>
-                <Copy className="w-3 h-3 opacity-60 ml-0.5 shrink-0" />
-              </>
-            )}
-          </button>
-
-          <a
-            href="tel:+918859099380"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface border border-border text-xs text-muted hover:border-border-strong hover:text-foreground transition-colors"
-          >
-            <Phone className="w-3.5 h-3.5 text-muted-soft" />
-            <span>+91 8859099380</span>
-          </a>
-
-          <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-muted border border-border/80 text-xs text-muted">
-            <MapPin className="w-3.5 h-3.5 text-muted-soft" />
-            <span>Uttarakhand</span>
+            <motion.dl
+              initial={reduce ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: EASE_OUT, delay: 0.7 }}
+              className="grid grid-cols-2 sm:grid-cols-1 gap-x-8 gap-y-3 font-mono text-xs sm:text-right"
+            >
+              <div>
+                <dt className="text-muted-soft">Experience</dt>
+                <dd className="text-foreground">3 yrs 10 mos</dd>
+              </div>
+              <div>
+                <dt className="text-muted-soft">Ships to</dt>
+                <dd className="text-foreground">iOS · Android</dd>
+              </div>
+            </motion.dl>
           </div>
 
-          <a
-            href="https://github.com/ArunKumarBhardwaj"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface border border-border text-xs text-muted hover:border-border-strong hover:text-foreground transition-colors"
+          <motion.div
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.9, delay: 0.85 }}
+            className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm"
           >
-            <GithubIcon className="w-3.5 h-3.5 text-muted-soft" />
-            <span>GitHub</span>
-            <ArrowUpRight className="w-3 h-3 text-muted-soft" />
-          </a>
+            <a
+              href={`mailto:${EMAIL}`}
+              className="inline-flex items-center gap-2 rounded-full bg-inverse text-inverse-fg px-5 py-2.5 font-medium hover:bg-signal hover:text-white transition-colors duration-300"
+            >
+              Get in touch
+              <ArrowUpRight className="w-4 h-4" />
+            </a>
+            <a
+              href={LINKS.resume}
+              download="ARUN_RESUME.pdf"
+              className="text-muted hover:text-foreground underline decoration-border-strong underline-offset-4 hover:decoration-signal transition-colors"
+            >
+              Download résumé (PDF)
+            </a>
+          </motion.div>
+        </section>
 
-          <a
-            href="/ARUN_RESUME.pdf"
-            download="ARUN_RESUME.pdf"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface border border-border text-xs text-muted hover:border-border-strong hover:text-foreground transition-colors"
-          >
-            <Download className="w-3.5 h-3.5 text-muted-soft" />
-            <span>Download Resume</span>
-          </a>
-        </motion.div>
-      </main>
+        {/* ---------- Shipped work ---------- */}
+        <section id="work" className="py-12 sm:py-16">
+          <Reveal>
+            <SectionHead
+              title="Selected work"
+              aside={`${PROJECTS.length} apps`}
+            />
+          </Reveal>
+          <Rule />
+          <ol>
+            {PROJECTS.map((p, i) => (
+              <li key={p.name}>
+                <Reveal delay={i * 0.05}>
+                  <article className="group grid gap-x-8 gap-y-2 py-6 sm:py-7 sm:grid-cols-[3rem_minmax(0,14rem)_minmax(0,1fr)]">
+                    <span className="font-mono text-xs text-muted-soft pt-2 transition-colors duration-300 group-hover:text-signal">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div>
+                      <h3 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
+                        {p.name}
+                      </h3>
+                      <p className="mt-1 font-mono text-[11px] text-muted-soft">
+                        {p.stack}
+                      </p>
+                    </div>
+                    <div className="sm:pt-2">
+                      <p className="text-[15px] leading-relaxed text-muted max-w-[60ch]">
+                        {p.summary}
+                      </p>
+                      {p.links && (
+                        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-foreground">
+                          {p.links.map((l) => (
+                            <ExternalLink key={l.href} href={l.href}>
+                              {l.label}
+                            </ExternalLink>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </article>
+                </Reveal>
+                <Rule delay={0.1} />
+              </li>
+            ))}
+          </ol>
+        </section>
 
-      {/* FOOTER */}
-      <footer className="max-w-xl w-full mx-auto text-[10px] sm:text-[11px] font-mono text-muted-soft flex justify-between items-center shrink-0 gap-2">
-        <span className="truncate">Arun Kumar Bhardwaj</span>
-        <span className="shrink-0">© {new Date().getFullYear()}</span>
-      </footer>
+        {/* ---------- Experience ---------- */}
+        <section id="experience" className="py-12 sm:py-16">
+          <Reveal>
+            <SectionHead title="Experience" aside="3 yrs 10 mos" />
+          </Reveal>
+          <Rule />
+          <ul>
+            {EXPERIENCE.map((e, i) => (
+              <li key={e.company}>
+                <Reveal delay={i * 0.05}>
+                  <div className="grid gap-x-8 gap-y-1 py-5 sm:grid-cols-[11rem_minmax(0,1fr)]">
+                    <span className="font-mono text-xs text-muted-soft pt-1 tabular-nums">
+                      {e.period}
+                    </span>
+                    <div>
+                      <p className="text-base sm:text-lg">
+                        <span className="font-medium">{e.role}</span>
+                        <span className="text-muted"> · </span>
+                        {e.href ? (
+                          <a
+                            href={e.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline decoration-border-strong underline-offset-4 hover:decoration-signal transition-colors"
+                          >
+                            {e.company}
+                          </a>
+                        ) : (
+                          e.company
+                        )}
+                      </p>
+                      <p className="mt-1 text-sm text-muted max-w-[60ch]">
+                        {e.note}
+                      </p>
+                    </div>
+                  </div>
+                </Reveal>
+                <Rule delay={0.1} />
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* ---------- Stack ---------- */}
+        <section id="stack" className="py-12 sm:py-16">
+          <Reveal>
+            <SectionHead title="Tools I reach for" />
+          </Reveal>
+          <Rule />
+          <dl className="grid gap-6 pt-6 sm:grid-cols-3">
+            {STACK.map((s, i) => (
+              <Reveal key={s.group} delay={i * 0.08}>
+                <dt className="font-mono text-xs text-muted-soft">{s.group}</dt>
+                <dd className="mt-2 text-[15px] leading-relaxed">{s.items}</dd>
+              </Reveal>
+            ))}
+          </dl>
+        </section>
+
+        {/* ---------- Contact ---------- */}
+        <section id="contact" className="pt-16 sm:pt-24 pb-10">
+          <Reveal>
+            <p className="text-muted text-lg">
+              Building something for iOS and Android?
+            </p>
+            <a
+              href={`mailto:${EMAIL}`}
+              className="group mt-3 inline-block font-display font-semibold tracking-[-0.03em] leading-[1] text-[clamp(1.6rem,6.2vw,4.25rem)] break-all sm:break-normal"
+            >
+              <span className="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_2px] bg-left-bottom bg-no-repeat transition-[background-size,color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-[length:100%_2px] group-hover:text-signal pb-1">
+                {EMAIL}
+              </span>
+            </a>
+            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted">
+              <CopyEmail />
+              <a
+                href={`tel:${PHONE.replace(/\s/g, "")}`}
+                className="font-mono text-xs hover:text-foreground transition-colors"
+              >
+                {PHONE}
+              </a>
+            </div>
+          </Reveal>
+
+          <div className="mt-16 sm:mt-24">
+            <Rule />
+            <footer className="flex flex-wrap items-center justify-between gap-4 pt-5 font-mono text-xs text-muted">
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                <ExternalLink href={LINKS.github}>GitHub</ExternalLink>
+                <ExternalLink href={LINKS.linkedin}>LinkedIn</ExternalLink>
+                <a
+                  href={LINKS.resume}
+                  download="ARUN_RESUME.pdf"
+                  className="hover:text-signal transition-colors"
+                >
+                  Résumé
+                </a>
+              </div>
+              <span className="text-muted-soft">
+                © {new Date().getFullYear()} Arun Kumar Bhardwaj
+              </span>
+            </footer>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

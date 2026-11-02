@@ -1,54 +1,55 @@
 @import "tailwindcss";
+@import "@fontsource-variable/bricolage-grotesque/opsz.css";
 @import "@fontsource/geist-sans/400.css";
 @import "@fontsource/geist-sans/500.css";
 @import "@fontsource/geist-sans/600.css";
-@import "@fontsource/geist-sans/700.css";
 @import "@fontsource/geist-mono/400.css";
 @import "@fontsource/geist-mono/500.css";
-@import "@fontsource/geist-mono/600.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+  Palette — "ink & signal"
+  paper   #f3f3f1   ink     #121212
+  graphite #6b6b68  rule    #dcdcd8
+  signal  #d9480f (light) / #ff6a3d (dark) — the only accent
+*/
 :root {
-  --font-geist-sans: "Geist Sans", system-ui, -apple-system, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-geist-sans: "Geist Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-geist-mono: "Geist Mono", ui-monospace, monospace;
-  --background: #f6f6f7;
-  --foreground: #18181b;
-  --muted: #71717a;
-  --muted-soft: #a1a1aa;
+
+  --background: #f3f3f1;
+  --foreground: #121212;
+  --muted: #5f5f5c;
+  --muted-soft: #8d8d89;
   --surface: #ffffff;
-  --surface-muted: #f4f4f5;
-  --border: #e4e4e7;
-  --border-strong: #d4d4d8;
-  --inverse: #18181b;
-  --inverse-fg: #fafafa;
-  --glow: rgba(0, 0, 0, 0.045);
-  --hairline: rgba(0, 0, 0, 0.14);
-  --selection-bg: rgba(24, 24, 27, 0.12);
-  --selection-fg: #18181b;
-  --badge-bg: rgba(244, 244, 245, 0.9);
-  --status: #10b981;
-  --accent-spark: #d97706;
+  --surface-muted: #ebebe8;
+  --border: #dcdcd8;
+  --border-strong: #c4c4bf;
+  --inverse: #121212;
+  --inverse-fg: #f3f3f1;
+  --signal: #d9480f;
+  --selection-bg: #d9480f;
+  --selection-fg: #ffffff;
+  --status: #16a34a;
 }
 
 .dark {
-  --background: #050505;
-  --foreground: #ededed;
-  --muted: #a1a1aa;
-  --muted-soft: #71717a;
-  --surface: #18181b;
-  --surface-muted: rgba(24, 24, 27, 0.5);
-  --border: #27272a;
-  --border-strong: #3f3f46;
-  --inverse: #ffffff;
-  --inverse-fg: #000000;
-  --glow: rgba(255, 255, 255, 0.025);
-  --hairline: rgba(255, 255, 255, 0.2);
-  --selection-bg: rgba(255, 255, 255, 0.2);
-  --selection-fg: #ffffff;
-  --badge-bg: rgba(24, 24, 27, 0.6);
-  --status: #34d399;
-  --accent-spark: #fbbf24;
+  --background: #0e0e0f;
+  --foreground: #ecebe7;
+  --muted: #a3a29e;
+  --muted-soft: #6f6e6b;
+  --surface: #171718;
+  --surface-muted: #141415;
+  --border: #252527;
+  --border-strong: #3a3a3d;
+  --inverse: #ecebe7;
+  --inverse-fg: #0e0e0f;
+  --signal: #ff6a3d;
+  --selection-bg: #ff6a3d;
+  --selection-fg: #0e0e0f;
+  --status: #4ade80;
 }
 
 @theme inline {
@@ -62,14 +63,15 @@
   --color-border-strong: var(--border-strong);
   --color-inverse: var(--inverse);
   --color-inverse-fg: var(--inverse-fg);
-  --color-badge: var(--badge-bg);
+  --color-signal: var(--signal);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
 }
 
 html {
-  scroll-behavior: smooth;
   color-scheme: light;
+  scroll-behavior: smooth;
 }
 
 html.dark {
@@ -79,8 +81,21 @@ html.dark {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-geist-sans);
   overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "wdth" 100;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
 /*
@@ -112,6 +127,9 @@ html[data-theme-vt="active"]::view-transition-new(root) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none !important;
